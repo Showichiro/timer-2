@@ -51,7 +51,7 @@
 # Dev: bun dev
 # Build: bun build
 # Check: bun check
-# Test: bun test
+# Test: bun run test
 # Preview: bun preview
 ```
 
