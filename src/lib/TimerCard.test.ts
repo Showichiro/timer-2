@@ -255,4 +255,51 @@ describe('TimerCard', () => {
       expect(mockOnDelete).toHaveBeenCalledWith('test-id');
     });
   });
+
+  describe('5.1 タイマー完了時の通知統合', () => {
+    it('settingsプロパティを受け取れる', () => {
+      const settings = { soundEnabled: true };
+      const { getByTestId } = render(TimerCard, {
+        props: { timer: mockTimer, onUpdate: mockOnUpdate, onDelete: mockOnDelete, settings },
+      });
+
+      expect(getByTestId('timer-card')).toBeTruthy();
+    });
+
+    it('soundEnabled=falseの場合でも視覚的な通知は動作する', async () => {
+      const shortTimer: TimerData = {
+        id: 'test-id',
+        name: 'ショートタイマー',
+        initialHours: 0,
+        initialMinutes: 0,
+        initialSeconds: 2,
+      };
+      const settings = { soundEnabled: false };
+
+      const { getByTestId } = render(TimerCard, {
+        props: { timer: shortTimer, onUpdate: mockOnUpdate, onDelete: mockOnDelete, settings },
+      });
+
+      await fireEvent.click(getByTestId('start-button'));
+
+      await waitFor(
+        () => {
+          expect(getByTestId('timer-display').textContent).toBe('00:00:00');
+        },
+        { timeout: 4000 }
+      );
+
+      const card = getByTestId('timer-card');
+      expect(card.classList.toString()).toMatch(/completed|animate|ring/);
+    });
+
+    it('タイマーカードにdata-timer-id属性が設定されている', () => {
+      const { getByTestId } = render(TimerCard, {
+        props: { timer: mockTimer, onUpdate: mockOnUpdate, onDelete: mockOnDelete },
+      });
+
+      const card = getByTestId('timer-card');
+      expect(card.getAttribute('data-timer-id')).toBe('test-id');
+    });
+  });
 });

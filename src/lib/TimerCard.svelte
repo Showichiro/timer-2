@@ -1,11 +1,12 @@
 <script lang="ts">
-  import type { TimerData } from './types';
+  import type { TimerData, AppSettings } from './types';
   import TimerDisplay from './TimerDisplay.svelte';
   import TimerControls from './TimerControls.svelte';
   import TimeInput from './TimeInput.svelte';
   import { playAlarm } from './audio';
   import { vibrate } from './vibration';
   import { announceToScreenReader } from './a11y';
+  import { showNotification, flashTitle } from './notification';
 
   type TimerStatus = 'idle' | 'running' | 'paused' | 'completed';
 
@@ -13,9 +14,10 @@
     timer: TimerData;
     onUpdate: (timer: TimerData) => void;
     onDelete: (id: string) => void;
+    settings?: AppSettings;
   }
 
-  let { timer, onUpdate, onDelete }: Props = $props();
+  let { timer, onUpdate, onDelete, settings }: Props = $props();
 
   let status = $state<TimerStatus>('idle');
   let remainingSeconds: number = $state(0);
@@ -38,10 +40,64 @@
     };
   });
 
+  // タイトル点滅の停止関数を保持
+  let stopFlashTitle: (() => void) | null = $state(null);
+
+  // ページがフォアグラウンドに戻った時に点滅を停止
+  $effect(() => {
+    function handleVisibilityChange() {
+      if (!document.hidden && stopFlashTitle) {
+        stopFlashTitle();
+        stopFlashTitle = null;
+      }
+    }
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      if (stopFlashTitle) {
+        stopFlashTitle();
+        stopFlashTitle = null;
+      }
+    };
+  });
+
+  function focusTimerCard() {
+    const card = document.querySelector(`[data-timer-id="${timer.id}"]`) as HTMLElement | null;
+    if (card) {
+      card.focus();
+      card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+    // ウィンドウをフォアグラウンドに
+    window.focus();
+    // 点滅を停止
+    if (stopFlashTitle) {
+      stopFlashTitle();
+      stopFlashTitle = null;
+    }
+  }
+
   function triggerCompletionNotifications() {
-    playAlarm();
+    // 設定に基づいて音声再生を制御
+    const soundEnabled = settings?.soundEnabled ?? true;
+    if (soundEnabled) {
+      playAlarm();
+    }
     vibrate([200, 100, 200]);
     announceToScreenReader(`${displayName}が完了しました`, 'assertive');
+
+    // ブラウザ通知を表示
+    showNotification({
+      title: 'タイマー完了',
+      body: `${displayName}が完了しました`,
+      tag: `timer-${timer.id}`,
+      onClick: focusTimerCard,
+    });
+
+    // タブがバックグラウンドの場合はタイトル点滅を開始
+    if (document.hidden) {
+      const originalTitle = document.title;
+      stopFlashTitle = flashTitle(`⏰ ${displayName}が完了`, originalTitle);
+    }
   }
 
   function start() {
@@ -136,6 +192,8 @@
 
 <div
   data-testid="timer-card"
+  data-timer-id={timer.id}
+  tabindex="-1"
   class="bg-lavender-50 border-2 border-lavender-200 rounded-xl p-4 shadow-md relative {isCompleted ? 'ring-4 ring-lavender-500 animate-pulse completed' : ''}"
 >
   <button

@@ -71,6 +71,7 @@
       <div draggable="true">
         <TimerCard
           {timer}
+          {settings}
           onUpdate={updateTimer}
           onDelete={deleteTimer}
         />
