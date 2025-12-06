@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { loadTimers, saveTimers, STORAGE_KEY } from './storage';
-import type { TimerData } from './types';
+import { loadTimers, saveTimers, STORAGE_KEY, loadSettings, saveSettings, SETTINGS_KEY } from './storage';
+import type { TimerData, AppSettings } from './types';
 
 describe('storage', () => {
   beforeEach(() => {
@@ -95,6 +95,57 @@ describe('storage', () => {
       expect(saved).toHaveLength(2);
       expect(saved[0].name).toBe('タイマー1');
       expect(saved[1].name).toBe('タイマー2');
+    });
+  });
+
+  describe('loadSettings', () => {
+    it('ローカルストレージにデータがない場合、デフォルト設定を返す', () => {
+      const settings = loadSettings();
+
+      expect(settings.soundEnabled).toBe(true);
+    });
+
+    it('保存された設定を読み込む', () => {
+      const testSettings: AppSettings = {
+        soundEnabled: false
+      };
+      localStorage.setItem(SETTINGS_KEY, JSON.stringify(testSettings));
+
+      const settings = loadSettings();
+
+      expect(settings.soundEnabled).toBe(false);
+    });
+
+    it('不正なJSONの場合、デフォルト設定にフォールバックする', () => {
+      localStorage.setItem(SETTINGS_KEY, 'invalid json');
+
+      const settings = loadSettings();
+
+      expect(settings.soundEnabled).toBe(true);
+    });
+  });
+
+  describe('saveSettings', () => {
+    it('設定をローカルストレージに保存する', () => {
+      const testSettings: AppSettings = {
+        soundEnabled: false
+      };
+
+      saveSettings(testSettings);
+
+      const saved = localStorage.getItem(SETTINGS_KEY);
+      expect(saved).toBe(JSON.stringify(testSettings));
+    });
+
+    it('soundEnabledがtrueの設定を保存できる', () => {
+      const testSettings: AppSettings = {
+        soundEnabled: true
+      };
+
+      saveSettings(testSettings);
+
+      const saved = JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}');
+      expect(saved.soundEnabled).toBe(true);
     });
   });
 });
