@@ -2,15 +2,19 @@
   import type { TimerData } from './lib/types';
   import TimerCard from './lib/TimerCard.svelte';
   import { loadTimers, saveTimers } from './lib/storage';
+  import { dndzone } from 'svelte-dnd-action';
 
-  let timers: TimerData[] = $state(loadTimers());
+  // svelte-dnd-action用の拡張型（idが必須）
+  type DndItem = TimerData & { id: string };
+
+  let timers: DndItem[] = $state(loadTimers());
 
   $effect(() => {
     saveTimers(timers);
   });
 
   function addTimer() {
-    const newTimer: TimerData = {
+    const newTimer: DndItem = {
       id: crypto.randomUUID(),
       name: `タイマー ${timers.length + 1}`,
       initialHours: 0,
@@ -27,6 +31,15 @@
   function deleteTimer(id: string) {
     timers = timers.filter(t => t.id !== id);
   }
+
+  // ドラッグ&ドロップイベントハンドラ
+  function handleDndConsider(e: CustomEvent<{ items: DndItem[] }>) {
+    timers = e.detail.items;
+  }
+
+  function handleDndFinalize(e: CustomEvent<{ items: DndItem[] }>) {
+    timers = e.detail.items;
+  }
 </script>
 
 <main class="min-h-screen bg-lavender-100 p-4 md:p-8">
@@ -34,13 +47,22 @@
     <h1 class="text-2xl md:text-3xl font-bold text-lavender-800">タイマーアプリ</h1>
   </header>
 
-  <div data-testid="timer-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 max-w-7xl mx-auto">
+  <div
+    data-testid="timer-grid"
+    data-dnd-zone="true"
+    class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 max-w-7xl mx-auto"
+    use:dndzone={{ items: timers }}
+    onconsider={handleDndConsider}
+    onfinalize={handleDndFinalize}
+  >
     {#each timers as timer (timer.id)}
-      <TimerCard
-        {timer}
-        onUpdate={updateTimer}
-        onDelete={deleteTimer}
-      />
+      <div draggable="true">
+        <TimerCard
+          {timer}
+          onUpdate={updateTimer}
+          onDelete={deleteTimer}
+        />
+      </div>
     {/each}
   </div>
 

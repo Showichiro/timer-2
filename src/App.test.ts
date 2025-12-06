@@ -120,6 +120,48 @@ describe('App', () => {
     });
   });
 
+  describe('ドラッグ&ドロップ機能 (Req 1.1, 1.2)', () => {
+    it('タイマーグリッドがドラッグ&ドロップに対応している', async () => {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify([
+        { id: 'timer-1', name: 'タイマー1', initialHours: 0, initialMinutes: 5, initialSeconds: 0 },
+        { id: 'timer-2', name: 'タイマー2', initialHours: 0, initialMinutes: 10, initialSeconds: 0 }
+      ]));
+      render(App);
+
+      const container = screen.getByTestId('timer-grid');
+      // dndzone属性が設定されていることを確認
+      expect(container.getAttribute('data-dnd-zone')).toBe('true');
+    });
+
+    it('ローカルストレージにタイマーが保存されて順序が維持される', async () => {
+      const initialTimers = [
+        { id: 'timer-1', name: 'タイマー1', initialHours: 0, initialMinutes: 5, initialSeconds: 0 },
+        { id: 'timer-2', name: 'タイマー2', initialHours: 0, initialMinutes: 10, initialSeconds: 0 }
+      ];
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(initialTimers));
+      render(App);
+
+      // ローカルストレージに保存されていることを確認
+      const stored = localStorage.getItem(STORAGE_KEY);
+      expect(stored).not.toBeNull();
+      const storedTimers = JSON.parse(stored!);
+      expect(storedTimers).toHaveLength(2);
+      expect(storedTimers[0].id).toBe('timer-1');
+      expect(storedTimers[1].id).toBe('timer-2');
+    });
+
+    it('ドラッグ用のスタイルが適用される', async () => {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify([
+        { id: 'timer-1', name: 'タイマー1', initialHours: 0, initialMinutes: 5, initialSeconds: 0 }
+      ]));
+      render(App);
+
+      const container = screen.getByTestId('timer-grid');
+      // ドラッグ&ドロップスタイルを適用するためのdata属性が存在すること
+      expect(container.getAttribute('data-dnd-zone')).toBe('true');
+    });
+  });
+
   describe('レスポンシブレイアウト (Req 8.1, 8.3, 8.4)', () => {
     it('タイマー追加ボタンが表示される', () => {
       render(App);

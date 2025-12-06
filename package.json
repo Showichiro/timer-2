@@ -29,6 +29,7 @@
   "dependencies": {
     "@tailwindcss/vite": "^4.1.17",
     "add": "^2.0.6",
+    "svelte-dnd-action": "^0.9.68",
     "tailwindcss": "^4.1.17"
   }
 }

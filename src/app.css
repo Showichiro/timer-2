@@ -12,3 +12,27 @@
   --color-lavender-900: #632c77;
   --color-lavender-950: #441556;
 }
+
+/* svelte-dnd-action ドラッグ&ドロップスタイル */
+[data-dnd-zone="true"] [draggable] {
+  cursor: grab;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+[data-dnd-zone="true"] [draggable]:active {
+  cursor: grabbing;
+}
+
+/* ドラッグ中の要素（元の位置） */
+[data-dnd-zone="true"] .dnd-ghost {
+  opacity: 0.4;
+}
+
+/* ドロップシャドウ要素（svelte-dnd-actionが自動生成） */
+[data-dnd-zone="true"] [data-is-dnd-shadow-item="true"] {
+  opacity: 0.7;
+  background-color: var(--color-lavender-200);
+  border: 2px dashed var(--color-lavender-500);
+  border-radius: 0.75rem;
+  transform: scale(1.02);
+}
