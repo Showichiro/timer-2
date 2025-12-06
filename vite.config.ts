@@ -5,6 +5,7 @@ import { playwright } from '@vitest/browser-playwright';
 
 // https://vite.dev/config/
 export default defineConfig({
+  base: '/timer-2/',
   plugins: [svelte(),tailwindcss()],
   test: {
    browser: {
