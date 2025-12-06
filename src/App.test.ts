@@ -160,6 +160,57 @@ describe('App', () => {
       // ドラッグ&ドロップスタイルを適用するためのdata属性が存在すること
       expect(container.getAttribute('data-dnd-zone')).toBe('true');
     });
+
+    it('複数のタイマーが正しい順序で表示される', async () => {
+      const initialTimers = [
+        { id: 'timer-1', name: 'タイマーA', initialHours: 0, initialMinutes: 5, initialSeconds: 0 },
+        { id: 'timer-2', name: 'タイマーB', initialHours: 0, initialMinutes: 10, initialSeconds: 0 },
+        { id: 'timer-3', name: 'タイマーC', initialHours: 0, initialMinutes: 15, initialSeconds: 0 }
+      ];
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(initialTimers));
+      render(App);
+
+      const names = screen.getAllByTestId('timer-name');
+      expect(names[0].textContent).toBe('タイマーA');
+      expect(names[1].textContent).toBe('タイマーB');
+      expect(names[2].textContent).toBe('タイマーC');
+    });
+
+    it('各タイマーカードにdata-timer-id属性が設定されている', async () => {
+      const initialTimers = [
+        { id: 'timer-1', name: 'タイマー1', initialHours: 0, initialMinutes: 5, initialSeconds: 0 },
+        { id: 'timer-2', name: 'タイマー2', initialHours: 0, initialMinutes: 10, initialSeconds: 0 }
+      ];
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(initialTimers));
+      render(App);
+
+      const cards = screen.getAllByTestId('timer-card');
+      expect(cards[0].getAttribute('data-timer-id')).toBe('timer-1');
+      expect(cards[1].getAttribute('data-timer-id')).toBe('timer-2');
+    });
+
+    it('ページリロード後もタイマーの順序が維持される', async () => {
+      const initialTimers = [
+        { id: 'timer-1', name: 'タイマーX', initialHours: 0, initialMinutes: 5, initialSeconds: 0 },
+        { id: 'timer-2', name: 'タイマーY', initialHours: 0, initialMinutes: 10, initialSeconds: 0 }
+      ];
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(initialTimers));
+
+      // 最初のレンダリング
+      const { unmount } = render(App);
+      let names = screen.getAllByTestId('timer-name');
+      expect(names[0].textContent).toBe('タイマーX');
+      expect(names[1].textContent).toBe('タイマーY');
+
+      // コンポーネントをアンマウント
+      unmount();
+
+      // 再レンダリング（リロード相当）
+      render(App);
+      names = screen.getAllByTestId('timer-name');
+      expect(names[0].textContent).toBe('タイマーX');
+      expect(names[1].textContent).toBe('タイマーY');
+    });
   });
 
   describe('レスポンシブレイアウト (Req 8.1, 8.3, 8.4)', () => {
