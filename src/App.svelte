@@ -1,17 +1,24 @@
 <script lang="ts">
-  import type { TimerData } from './lib/types';
+  import type { TimerData, AppSettings } from './lib/types';
   import TimerCard from './lib/TimerCard.svelte';
-  import { loadTimers, saveTimers } from './lib/storage';
+  import SettingsPanel from './lib/SettingsPanel.svelte';
+  import HamburgerMenu from './lib/HamburgerMenu.svelte';
+  import { loadTimers, saveTimers, loadSettings } from './lib/storage';
   import { dndzone } from 'svelte-dnd-action';
 
   // svelte-dnd-action用の拡張型（idが必須）
   type DndItem = TimerData & { id: string };
 
   let timers: DndItem[] = $state(loadTimers());
+  let settings: AppSettings = $state(loadSettings());
 
   $effect(() => {
     saveTimers(timers);
   });
+
+  function handleSettingsChange(newSettings: AppSettings) {
+    settings = newSettings;
+  }
 
   function addTimer() {
     const newTimer: DndItem = {
@@ -43,8 +50,13 @@
 </script>
 
 <main class="min-h-screen bg-lavender-100 p-4 md:p-8">
-  <header class="mb-6 text-center">
-    <h1 class="text-2xl md:text-3xl font-bold text-lavender-800">タイマーアプリ</h1>
+  <header class="mb-6">
+    <div class="max-w-7xl mx-auto flex items-center justify-between">
+      <h1 class="text-2xl md:text-3xl font-bold text-lavender-800">タイマーアプリ</h1>
+      <HamburgerMenu>
+        <SettingsPanel onSettingsChange={handleSettingsChange} />
+      </HamburgerMenu>
+    </div>
   </header>
 
   <div

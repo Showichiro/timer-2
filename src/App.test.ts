@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { render, cleanup, screen, fireEvent } from '@testing-library/svelte';
 import App from './App.svelte';
-import { STORAGE_KEY } from './lib/storage';
+import { STORAGE_KEY, SETTINGS_KEY } from './lib/storage';
 
 describe('App', () => {
   beforeEach(() => {
@@ -175,6 +175,38 @@ describe('App', () => {
 
       const container = screen.getByTestId('timer-grid');
       expect(container).toBeTruthy();
+    });
+  });
+
+  describe('設定パネル統合 (Req 3.4)', () => {
+    it('ハンバーガーメニューボタンが表示される', () => {
+      render(App);
+
+      const menuButton = screen.getByTestId('hamburger-menu-button');
+      expect(menuButton).toBeTruthy();
+    });
+
+    it('ハンバーガーメニューを開くと設定パネルが表示される', async () => {
+      render(App);
+
+      const menuButton = screen.getByTestId('hamburger-menu-button');
+      await fireEvent.click(menuButton);
+
+      const settingsPanel = screen.getByTestId('settings-panel');
+      expect(settingsPanel).toBeTruthy();
+    });
+
+    it('設定変更がローカルストレージに保存される', async () => {
+      render(App);
+
+      const menuButton = screen.getByTestId('hamburger-menu-button');
+      await fireEvent.click(menuButton);
+
+      const soundToggle = screen.getByTestId('sound-toggle') as HTMLInputElement;
+      await fireEvent.click(soundToggle);
+
+      const stored = localStorage.getItem(SETTINGS_KEY);
+      expect(stored).not.toBeNull();
     });
   });
 });
