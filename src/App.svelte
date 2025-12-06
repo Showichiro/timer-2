@@ -1,47 +1,59 @@
 <script lang="ts">
-  import svelteLogo from './assets/svelte.svg'
-  import viteLogo from '/vite.svg'
-  import Counter from './lib/Counter.svelte'
+  import type { TimerData } from './lib/types';
+  import TimerCard from './lib/TimerCard.svelte';
+  import { loadTimers, saveTimers } from './lib/storage';
+
+  let timers: TimerData[] = $state(loadTimers());
+
+  $effect(() => {
+    saveTimers(timers);
+  });
+
+  function addTimer() {
+    const newTimer: TimerData = {
+      id: crypto.randomUUID(),
+      name: `タイマー ${timers.length + 1}`,
+      initialHours: 0,
+      initialMinutes: 5,
+      initialSeconds: 0
+    };
+    timers = [...timers, newTimer];
+  }
+
+  function updateTimer(updatedTimer: TimerData) {
+    timers = timers.map(t => t.id === updatedTimer.id ? updatedTimer : t);
+  }
+
+  function deleteTimer(id: string) {
+    timers = timers.filter(t => t.id !== id);
+  }
 </script>
 
-<main>
-  <div>
-    <a href="https://vite.dev" target="_blank" rel="noreferrer">
-      <img src={viteLogo} class="logo" alt="Vite Logo" />
-    </a>
-    <a href="https://svelte.dev" target="_blank" rel="noreferrer">
-      <img src={svelteLogo} class="logo svelte" alt="Svelte Logo" />
-    </a>
+<main class="min-h-screen bg-lavender-100 p-4 md:p-8">
+  <header class="mb-6 text-center">
+    <h1 class="text-2xl md:text-3xl font-bold text-lavender-800">タイマーアプリ</h1>
+  </header>
+
+  <div data-testid="timer-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 max-w-7xl mx-auto">
+    {#each timers as timer (timer.id)}
+      <TimerCard
+        {timer}
+        onUpdate={updateTimer}
+        onDelete={deleteTimer}
+      />
+    {/each}
   </div>
-  <h1>Vite + Svelte</h1>
 
-  <div class="card">
-    <Counter />
+  <div class="flex justify-center mt-6">
+    <button
+      data-testid="add-timer-button"
+      onclick={addTimer}
+      class="bg-lavender-500 hover:bg-lavender-600 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition-colors flex items-center gap-2"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+      </svg>
+      タイマーを追加
+    </button>
   </div>
-
-  <p>
-    Check out <a href="https://github.com/sveltejs/kit#readme" target="_blank" rel="noreferrer">SvelteKit</a>, the official Svelte app framework powered by Vite!
-  </p>
-
-  <p class="read-the-docs">
-    Click on the Vite and Svelte logos to learn more
-  </p>
 </main>
-
-<style>
-  .logo {
-    height: 6em;
-    padding: 1.5em;
-    will-change: filter;
-    transition: filter 300ms;
-  }
-  .logo:hover {
-    filter: drop-shadow(0 0 2em #646cffaa);
-  }
-  .logo.svelte:hover {
-    filter: drop-shadow(0 0 2em #ff3e00aa);
-  }
-  .read-the-docs {
-    color: #888;
-  }
-</style>
