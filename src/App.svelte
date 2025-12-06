@@ -70,9 +70,10 @@
     <button
       data-testid="add-timer-button"
       onclick={addTimer}
-      class="bg-lavender-500 hover:bg-lavender-600 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition-colors flex items-center gap-2"
+      aria-label="新しいタイマーを追加"
+      class="bg-lavender-500 hover:bg-lavender-600 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition-colors flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lavender-700 focus-visible:ring-offset-2"
     >
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
       </svg>
       タイマーを追加

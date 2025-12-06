@@ -15,6 +15,9 @@
 
 <div
   data-testid="timer-display"
+  role="timer"
+  aria-label="残り時間"
+  aria-live="off"
   class="text-4xl sm:text-5xl md:text-6xl font-mono font-bold text-lavender-700 text-center py-4"
 >
   {formatTime(seconds)}

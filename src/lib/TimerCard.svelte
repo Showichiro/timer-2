@@ -5,6 +5,7 @@
   import TimeInput from './TimeInput.svelte';
   import { playAlarm } from './audio';
   import { vibrate } from './vibration';
+  import { announceToScreenReader } from './a11y';
 
   type TimerStatus = 'idle' | 'running' | 'paused' | 'completed';
 
@@ -40,12 +41,14 @@
   function triggerCompletionNotifications() {
     playAlarm();
     vibrate([200, 100, 200]);
+    announceToScreenReader(`${displayName}が完了しました`, 'assertive');
   }
 
   function start() {
     if (remainingSeconds <= 0) return;
 
     status = 'running';
+    announceToScreenReader(`${displayName}を開始しました`);
     intervalId = setInterval(() => {
       remainingSeconds -= 1;
       if (remainingSeconds <= 0) {
@@ -62,6 +65,7 @@
 
   function pause() {
     status = 'paused';
+    announceToScreenReader(`${displayName}を一時停止しました`);
     if (intervalId !== null) {
       clearInterval(intervalId);
       intervalId = null;
@@ -137,10 +141,10 @@
   <button
     data-testid="delete-button"
     onclick={handleDelete}
-    class="absolute top-2 right-2 w-8 h-8 flex items-center justify-center rounded-full bg-lavender-200 text-lavender-700 hover:bg-lavender-300 hover:text-lavender-900 transition-colors"
-    aria-label="削除"
+    class="absolute top-2 right-2 w-8 h-8 flex items-center justify-center rounded-full bg-lavender-200 text-lavender-700 hover:bg-lavender-300 hover:text-lavender-900 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lavender-700 focus-visible:ring-offset-2"
+    aria-label="タイマーを削除"
   >
-    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
     </svg>
   </button>
@@ -153,13 +157,15 @@
         bind:value={editingName}
         onblur={confirmName}
         onkeydown={handleNameKeyDown}
-        class="text-lg font-semibold text-lavender-800 bg-white border-2 border-lavender-400 rounded px-2 py-1 text-center focus:outline-none focus:border-lavender-600"
+        aria-label="タイマー名を編集"
+        class="text-lg font-semibold text-lavender-800 bg-white border-2 border-lavender-400 rounded px-2 py-1 text-center focus:outline-none focus-visible:ring-2 focus-visible:ring-lavender-700 focus-visible:ring-offset-1 focus-visible:border-lavender-600"
       />
     {:else}
       <button
         data-testid="timer-name"
         onclick={startEditingName}
-        class="text-lg font-semibold text-lavender-800 hover:text-lavender-600 cursor-pointer bg-transparent border-none"
+        aria-label="タイマー名を変更するにはクリック"
+        class="text-lg font-semibold text-lavender-800 hover:text-lavender-600 cursor-pointer bg-transparent border-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lavender-700 focus-visible:ring-offset-2 rounded"
       >
         {displayName}
       </button>

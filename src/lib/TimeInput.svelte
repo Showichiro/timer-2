@@ -49,7 +49,7 @@
   }
 
   const inputClass =
-    'w-16 sm:w-20 text-center text-xl sm:text-2xl font-mono bg-lavender-100 border-2 border-lavender-300 rounded-lg py-2 focus:outline-none focus:border-lavender-500 disabled:bg-lavender-50 disabled:text-lavender-400';
+    'w-16 sm:w-20 text-center text-xl sm:text-2xl font-mono bg-lavender-100 border-2 border-lavender-300 rounded-lg py-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-lavender-700 focus-visible:ring-offset-1 focus-visible:border-lavender-500 disabled:bg-lavender-50 disabled:text-lavender-400';
 </script>
 
 <div class="flex items-center justify-center gap-1 sm:gap-2 py-2">
